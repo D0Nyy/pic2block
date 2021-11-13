@@ -24,9 +24,9 @@ namespace pic2block
             var image = Console.ReadLine();
             
             Console.Write("Give width: ");
-            var width = Console.Read();
+            var width = Int32.Parse(Console.ReadLine());
             Console.Write("Give height: ");
-            var height = Console.Read();
+            var height = Int32.Parse(Console.ReadLine());
             
             // Set canvas size and run
             structure = new Structure(new Size(width, height));
