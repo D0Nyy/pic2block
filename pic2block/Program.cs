@@ -17,6 +17,8 @@ namespace pic2block
 
         private static readonly List<Block> Blocks = new List<Block>();
 
+        private static int choise;
+
         static void Main(string[] args)
         {
             GetBlockColor();
@@ -28,9 +30,21 @@ namespace pic2block
             Console.Write("Give height: ");
             var height = Int32.Parse(Console.ReadLine());
             
-            // Set canvas size and run
-            structure = new Structure(new Size(width, height));
-            TranslatePicture(image);
+            Console.Write("Press 1 for Wall(MAX:255x255) or 2 for Ground(NO LIMIT): ");
+            choise = Int32.Parse(Console.ReadLine());
+            
+            if (choise == 1 || choise == 2)
+            {
+                Console.WriteLine("Converting image...");
+                // Set canvas size and run
+                structure = new Structure(new Size(width, height));
+                TranslatePicture(image);
+            }
+            else
+            {
+                Console.WriteLine("ERROR. Not a valid option.");
+                return;
+            }
         }
 
         /// <summary>
@@ -84,7 +98,8 @@ namespace pic2block
             // Resize image
             if (image.Height > structure.size.Height || image.Width > structure.size.Width)
             {
-                image.Mutate(x => x.Resize(structure.size.Width,structure.size.Height,KnownResamplers.NearestNeighbor)); // Removing NearestNeighbor makes it ugly
+                image.Mutate(x => x.Resize(structure.size.Width,structure.size.Height,KnownResamplers.NearestNeighbor)); // Removing NearestNeighbor makes it blurry
+                //image.Mutate(x => x.Resize(structure.size.Width,structure.size.Height)); // Maybe this is better for bigger images
             }
             else
             {
@@ -139,10 +154,20 @@ namespace pic2block
 
             foreach (var block in structure.blocks)
             {
-                commands.Add($"setblock ~{structure.size.Width - block.position.X} ~{structure.size.Height - block.position.Y} ~{-1} {block.BlockID}");
+                if (choise == 1)
+                {
+                    // WALL (MAX: 255X255)
+                    commands.Add($"setblock ~{structure.size.Width - block.position.X} ~{structure.size.Height - block.position.Y} ~{-1} {block.BlockID}");
+                }
+                else if (choise == 2)
+                {
+                    // GROUND (Technically Unlimited. Be careful)
+                    commands.Add($"setblock ~{structure.size.Width - block.position.X} ~{-1} ~{structure.size.Height - block.position.Y} {block.BlockID}");
+                }
             }
             
             File.WriteAllLines(fileName,commands);
+            Console.WriteLine("Finished!");
         }
 
         /// <summary>
